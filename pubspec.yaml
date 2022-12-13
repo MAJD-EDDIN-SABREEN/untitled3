@@ -54,6 +54,7 @@ dependencies:
   path: ^1.8.0
   firebase_image: ^1.1.0
   dropdown_textfield: ^1.0.7
+  searchfield: ^0.7.2
  #
 dev_dependencies:
   flutter_test:

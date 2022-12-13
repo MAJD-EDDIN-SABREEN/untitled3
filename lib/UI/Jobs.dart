@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:searchfield/searchfield.dart';
 import 'package:untitled3/UI/addJob.dart';
 import 'package:untitled3/UI/application.dart';
 import 'package:untitled3/UI/jobDetail.dart';
@@ -22,7 +23,7 @@ class JobsState extends State<Jobs>{
   String sectionId;
   String role;
   TextEditingController _searchController = TextEditingController();
-  List<DocumentSnapshot> documents = [];
+  List documents = [];
   String searchText = '';
   JobsState(this.sectionId,this.role);
    @override
@@ -37,20 +38,18 @@ class JobsState extends State<Jobs>{
          Container(
          height: MediaQuery.of(context).size.height,
          width: MediaQuery.of(context).size.width/1.2 ,
-         child:  TextField(
-           controller: _searchController,
-           onChanged: (value) {
-             setState(() {
-               searchText = value;
-             });
-           },
-           decoration: InputDecoration(
-             hintText: 'Search...',
-             prefixIcon: Icon(Icons.search),
-
-           ),
+         child: SearchField(
+           suggestions: documents
+               .map(
+                 (e) => SearchFieldListItem(
+               e["title"],
+               item: e,
+             ),
+           )
+               .toList(),
          ),
-       )],
+       )
+       ],
      ),
      body:
 
@@ -70,6 +69,8 @@ class JobsState extends State<Jobs>{
                itemCount: snapshots.data.docs!.length,
                itemBuilder: (context,i)
                {
+                 documents.add(snapshots.data.docs[i].data());
+                 print("${snapshots.data.docs[i].data()}");
                  return ListTile(
                    trailing: SizedBox(height: 100,width: 100,child:Row(children: [Text("${snapshots.data.docs[i].data()["salary"]}"),Icon(Icons.monetization_on)]) ,)
 
