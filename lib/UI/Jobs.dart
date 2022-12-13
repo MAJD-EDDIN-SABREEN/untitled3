@@ -21,6 +21,9 @@ return JobsState(this.sectionId,this.role);
 class JobsState extends State<Jobs>{
   String sectionId;
   String role;
+  TextEditingController _searchController = TextEditingController();
+  List<DocumentSnapshot> documents = [];
+  String searchText = '';
   JobsState(this.sectionId,this.role);
    @override
   Widget build(BuildContext context) {
@@ -30,69 +33,94 @@ class JobsState extends State<Jobs>{
      Scaffold(
      appBar: AppBar(
        backgroundColor: Colors.blue,
+       actions: [
+         Container(
+         height: MediaQuery.of(context).size.height,
+         width: MediaQuery.of(context).size.width/1.2 ,
+         child:  TextField(
+           controller: _searchController,
+           onChanged: (value) {
+             setState(() {
+               searchText = value;
+             });
+           },
+           decoration: InputDecoration(
+             hintText: 'Search...',
+             prefixIcon: Icon(Icons.search),
+
+           ),
+         ),
+       )],
      ),
-     body: StreamBuilder<dynamic>(stream:jobRef.snapshots(),
-    builder:(context,snapshots){
+     body:
 
-    if(snapshots.hasError){
-    return Text("erorr");
-    }
-    if (snapshots.hasData){
-    return ListView.builder(
-      scrollDirection: Axis.vertical,
-    itemCount: snapshots.data.docs!.length,
-    itemBuilder: (context,i)
-    {
-    return ListTile(
-      trailing: SizedBox(height: 100,width: 100,child:Row(children: [Text("${snapshots.data.docs[i].data()["salary"]}"),Icon(Icons.monetization_on)]) ,)
 
-   , title: Text("${snapshots.data.docs[i].data()["title"]}"),
-    subtitle: Text("${snapshots.data.docs[i].data()["description"]}"),
-      onTap:  (){
-      showDialog(context: context, builder: (
-          BuildContext context) {
-        return
-          AlertDialog(
-            title: Text("please select"),
-            actions: [
-              InkWell(
-                child: Row(
-                  children: [
-                    Icon(Icons.update),
-                    Text("Update job")
-                  ],
-                )
-                , onTap: () {
-                Navigator.push(context,MaterialPageRoute(builder: (context)=>JobDetail(snapshots.data.docs[i].id, "${snapshots.data.docs[i].data()["image"]}", "${snapshots.data.docs[i].data()["title"]}", "${snapshots.data.docs[i].data()["description"]}", "${snapshots.data.docs[i].data()["salary"]}")));
-              },
-              ),
-              Padding(padding: EdgeInsets.all(10),),
-              InkWell(
-                child: Row(
-                  children: [
-                    Icon(Icons.padding_rounded),
-                    Text("show applications")
-                  ],
-                )
-                , onTap: () {
-                Navigator.push(context,MaterialPageRoute(builder: (context)=>ShowApplicaton(sectionId, snapshots.data.docs[i].id)));
-              },
-              ),
 
-              //onTap: uplodImages(),
+       StreamBuilder<dynamic>(stream:jobRef.snapshots(),
+         builder:(context,snapshots){
 
-            ],
-          );
-      });},
-    );
-    }
-    ,
+           if(snapshots.hasError){
+             return Text("erorr");
+           }
+           if (snapshots.hasData){
 
-    );
-    }
-    return Center(child: CircularProgressIndicator(),);
-    }
+             return
+               ListView.builder(
+               scrollDirection: Axis.vertical,
+               itemCount: snapshots.data.docs!.length,
+               itemBuilder: (context,i)
+               {
+                 return ListTile(
+                   trailing: SizedBox(height: 100,width: 100,child:Row(children: [Text("${snapshots.data.docs[i].data()["salary"]}"),Icon(Icons.monetization_on)]) ,)
+
+                   , title: Text("${snapshots.data.docs[i].data()["title"]}"),
+                   subtitle: Text("${snapshots.data.docs[i].data()["description"]}"),
+                   onTap:  (){
+                     showDialog(context: context, builder: (
+                         BuildContext context) {
+                       return
+                         AlertDialog(
+                           title: Text("please select"),
+                           actions: [
+                             InkWell(
+                               child: Row(
+                                 children: [
+                                   Icon(Icons.update),
+                                   Text("Update job")
+                                 ],
+                               )
+                               , onTap: () {
+                               Navigator.push(context,MaterialPageRoute(builder: (context)=>JobDetail(snapshots.data.docs[i].id, "${snapshots.data.docs[i].data()["image"]}", "${snapshots.data.docs[i].data()["title"]}", "${snapshots.data.docs[i].data()["description"]}", "${snapshots.data.docs[i].data()["salary"]}","${snapshots.data.docs[i].data()["requirement"]}","${snapshots.data.docs[i].data()["age"]}","${snapshots.data.docs[i].data()["status"]}",sectionId,"${snapshots.data.docs[i].data()["lat"]}","${snapshots.data.docs[i].data()["lang"]}")));
+                             },
+                             ),
+                             Padding(padding: EdgeInsets.all(10),),
+                             InkWell(
+                               child: Row(
+                                 children: [
+                                   Icon(Icons.padding_rounded),
+                                   Text("show applications")
+                                 ],
+                               )
+                               , onTap: () {
+                               Navigator.push(context,MaterialPageRoute(builder: (context)=>ShowApplicaton(sectionId, snapshots.data.docs[i].id)));
+                             },
+                             ),
+
+                             //onTap: uplodImages(),
+
+                           ],
+                         );
+                     });},
+                 );
+               }
+               ,
+
+             );
+           }
+           return Center(child: CircularProgressIndicator(),);
+         }
      ),
+
      floatingActionButton: FloatingActionButton(onPressed: (){
        Navigator.push(context,MaterialPageRoute(builder: (context)=>AddJob(sectionId)));
      },child: Icon(Icons.add)),

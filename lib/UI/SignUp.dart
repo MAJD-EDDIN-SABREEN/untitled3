@@ -4,6 +4,7 @@ import 'package:cupertino_radio_choice/cupertino_radio_choice.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:untitled3/UI/Log_In.dart';
 import 'Sections.dart';
@@ -18,6 +19,13 @@ return SignUpState();
   bool isLoading = false;
   String? gender="male";
   String? role="manger";
+  LatLng startLocation = LatLng(30.044420, 31.235712);
+  String? lat;
+  String? lang;
+  GoogleMapController? mapController;
+  Set<Marker>myMarker={
+    Marker(markerId: MarkerId("1"),position:LatLng(30.044420, 31.235712) )
+  };
   TextEditingController name=new TextEditingController();
   TextEditingController password=new TextEditingController();
   TextEditingController email=new TextEditingController();
@@ -33,6 +41,8 @@ return SignUpState();
       "role": role,
       "created_at": date,
       "password":password.text
+      ,"lat":lat,
+      "lang":lang
     });
   }
   signUp() async {
@@ -179,6 +189,42 @@ padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     choices: {'manger' : 'manger', 'employee' : 'Employee'},
                     onChange: (selected) {role = selected;},
                     initialKeyValue: 'male'),
+               Card(child:
+               Container(
+                 padding: EdgeInsets.all(20),
+                 height: MediaQuery.of(context).size.height / 4,
+                 child: Stack(children: [
+                   GoogleMap(
+                     //Map widget from google_maps_flutter package
+                     zoomGesturesEnabled: true, //enable Zoom in, out on map
+                     initialCameraPosition: CameraPosition(
+                       //innital position in map
+                       target: startLocation, //initial position
+                       zoom: 14.0, //initial zoom level
+                     )
+                     ,
+                     markers: myMarker,
+                     mapType: MapType.normal,
+                     onTap: (latlang){
+                       setState(() {
+                         myMarker.remove(Marker(markerId: MarkerId("1")));
+                         myMarker.add( Marker(markerId: MarkerId("1"),position:latlang ));
+                         lat=latlang.latitude.toString();
+                         lang=latlang.longitude.toString();
+                       });
+                       print(latlang.latitude);
+
+                     },//map type
+                     onMapCreated: (controller) {
+                       //method called when map is created
+                       setState(() {
+                         mapController = controller;
+                       });
+                     },
+                   ),
+
+                 ]),
+               ), elevation: 5,color: Colors.white),
                 Padding(padding: EdgeInsets.only(top:MediaQuery.of(context).size.height/6)),
                 (isLoading==false) ?  ElevatedButton(
 

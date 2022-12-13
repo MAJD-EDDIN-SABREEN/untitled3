@@ -33,11 +33,18 @@ class _LoginState extends State<Login> {
          password: password.text
      );
    await  getRole();
+   setState(() {
+
+   });
      String? id=userCredential.user?.uid;
-    final prefs=await SharedPreferences.getInstance();
+     final prefs=await SharedPreferences.getInstance();
      await prefs.setString("id", id!);
      await prefs.setString('email', email.text);
-   } on FirebaseAuthException catch (e) {
+     setState(() {
+
+     });
+   }
+   on FirebaseAuthException catch (e) {
      if (e.code == 'user-not-found') {
       return showDialog(
          context: context,

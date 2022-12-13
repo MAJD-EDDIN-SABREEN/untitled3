@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:untitled3/UI/Log_In.dart';
+import 'package:untitled3/UI/Myapplication.dart';
 import 'package:untitled3/UI/Setting.dart';
 import 'package:untitled3/UI/addSection.dart';
 import 'package:untitled3/UI/sectionDetail.dart';
@@ -27,7 +28,25 @@ class SectionState extends State<Section> {
   String role;
 
   SectionState(this.role);
+  int _selectedIndex = 0;
+  void _onItemTapped(int index) {
+    if(index==0){
 
+    }
+    if(index==1){
+      Navigator.push(context,MaterialPageRoute(builder: (context)=>MyApplication()));
+
+
+    }
+    if(index==2){
+      Navigator.push(context,MaterialPageRoute(builder: (context)=>Setting()));
+
+    }
+    setState(() {
+      _selectedIndex = index;
+      print(_selectedIndex);
+    });
+  }
   CollectionReference sectionRef = FirebaseFirestore.instance.collection(
       "Section");
 
@@ -36,6 +55,11 @@ signOut() async {
   Navigator.pushAndRemoveUntil(context,MaterialPageRoute(builder: (context)=>Login()),(Route<dynamic> route) => false);
 
 }
+@override
+  void initState() {
+
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -166,7 +190,9 @@ signOut() async {
       Navigator.push(context,MaterialPageRoute(builder: (context)=>AddSection()));
     },child: Icon(Icons.add)),
 
-    ):
+
+
+      ):
       Scaffold(
         appBar: AppBar(backgroundColor: Colors.blue,
 
@@ -279,6 +305,25 @@ signOut() async {
               return Center(child: CircularProgressIndicator());
             }
         ) ,),
+          bottomNavigationBar: BottomNavigationBar(
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.home),
+                label: 'Home',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.work),
+                label: 'My application',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.person),
+                label: 'Profile',
+              ),
+            ],
+            currentIndex: _selectedIndex,
+            selectedItemColor: Colors.blue,
+            onTap: _onItemTapped,
+          )
 
 
       )

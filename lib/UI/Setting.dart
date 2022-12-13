@@ -4,6 +4,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:untitled3/UI/EditInfo.dart';
 import 'package:untitled3/UI/Myapplication.dart';
 
+import 'Skills.dart';
+
 class Setting extends StatefulWidget {
   @override
   State<Setting> createState() => _SettingState();
@@ -20,11 +22,15 @@ class _SettingState extends State<Setting> {
     else
       await prefs.setBool("theme", false);
   }
-
-  getDetail() async {
+  getEmail() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     email = await prefs.getString('email');
+    print(email);
     setState(() {});
+  }
+
+  getDetail() async {
+    await getEmail();
 
     var userPref = FirebaseFirestore.instance.collection("Users");
     var query = await userPref.where("email", isEqualTo: email).get();
@@ -119,7 +125,8 @@ class _SettingState extends State<Setting> {
                   SizedBox(
                     width: MediaQuery.of(context).size.width / 1.5,
                     child:
-                        ElevatedButton(onPressed: () {}, child: Text("Skills")),
+                        ElevatedButton(onPressed: () { Navigator.push(context,
+                            MaterialPageRoute(builder: (context) => Skills()));}, child: Text("Skills")),
                   ),
                 ]),
               ),
