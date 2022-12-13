@@ -1,33 +1,32 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:untitled3/UI/Sections.dart';
 import 'package:untitled3/UI/SignUp.dart';
 import 'UI/Jobs.dart';
+import 'UI/Log_In.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(const MyApp());
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  var email = prefs.getString('email');
+  var role=  prefs.getString('role');
+  var theme=prefs.getBool('theme');
+  runApp(
+      MaterialApp(
+    debugShowCheckedModeBanner: false,
+    title: 'Flutter Demo',
+    theme: ThemeData.light(),
+    routes: <String, WidgetBuilder>{
+
+      '/section': (BuildContext context) => Section(""),
+
+    },
+    home:(email==null)?Login():Section(role.toString()),
+  ));
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
 
-  // This widget is the root of your application.
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
 
-        primarySwatch: Colors.blue,
-      ),
-      routes: <String, WidgetBuilder>{
-
-        '/section': (BuildContext context) => Section(),
-
-      },
-      home:SignUp(),
-    );
-  }
-}
 

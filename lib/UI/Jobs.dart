@@ -2,21 +2,32 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:untitled3/UI/addJob.dart';
+import 'package:untitled3/UI/application.dart';
 import 'package:untitled3/UI/jobDetail.dart';
 import 'package:untitled3/UI/sectionDetail.dart';
+import 'package:untitled3/UI/showApplcaton.dart';
 
 class Jobs extends StatefulWidget{
+  String sectionId;
+  String role;
+  Jobs(this.sectionId , this.role);
+
   @override
   State<StatefulWidget> createState() {
-return JobsState();
+return JobsState(this.sectionId,this.role);
   }
 
-}class JobsState extends State<Jobs>{
-  CollectionReference jobRef = FirebaseFirestore.instance.collection(
-      "Jobs");
-  @override
+}
+class JobsState extends State<Jobs>{
+  String sectionId;
+  String role;
+  JobsState(this.sectionId,this.role);
+   @override
   Widget build(BuildContext context) {
-   return Scaffold(
+    CollectionReference jobRef =FirebaseFirestore.instance.collection("Section").doc(sectionId).collection("Jobs");
+   return
+     (role=="manger")?
+     Scaffold(
      appBar: AppBar(
        backgroundColor: Colors.blue,
      ),
@@ -28,11 +39,14 @@ return JobsState();
     }
     if (snapshots.hasData){
     return ListView.builder(
+      scrollDirection: Axis.vertical,
     itemCount: snapshots.data.docs!.length,
     itemBuilder: (context,i)
     {
-    return ListTile(trailing: Icon(Icons.monetization_on),
-    title: Text("${snapshots.data.docs[i].data()["title"]}"),
+    return ListTile(
+      trailing: SizedBox(height: 100,width: 100,child:Row(children: [Text("${snapshots.data.docs[i].data()["salary"]}"),Icon(Icons.monetization_on)]) ,)
+
+   , title: Text("${snapshots.data.docs[i].data()["title"]}"),
     subtitle: Text("${snapshots.data.docs[i].data()["description"]}"),
       onTap:  (){
       showDialog(context: context, builder: (
@@ -53,6 +67,17 @@ return JobsState();
               },
               ),
               Padding(padding: EdgeInsets.all(10),),
+              InkWell(
+                child: Row(
+                  children: [
+                    Icon(Icons.padding_rounded),
+                    Text("show applications")
+                  ],
+                )
+                , onTap: () {
+                Navigator.push(context,MaterialPageRoute(builder: (context)=>ShowApplicaton(sectionId, snapshots.data.docs[i].id)));
+              },
+              ),
 
               //onTap: uplodImages(),
 
@@ -69,9 +94,64 @@ return JobsState();
     }
      ),
      floatingActionButton: FloatingActionButton(onPressed: (){
-       Navigator.push(context,MaterialPageRoute(builder: (context)=>AddJob()));
+       Navigator.push(context,MaterialPageRoute(builder: (context)=>AddJob(sectionId)));
      },child: Icon(Icons.add)),
-   );
+   ):
+     Scaffold(
+       appBar: AppBar(
+         backgroundColor: Colors.blue,
+       ),
+       body: StreamBuilder<dynamic>(stream:jobRef.snapshots(),
+           builder:(context,snapshots){
+
+             if(snapshots.hasError){
+               return Text("erorr");
+             }
+             if (snapshots.hasData){
+               return ListView.builder(
+                 itemCount: snapshots.data.docs!.length,
+                 itemBuilder: (context,i)
+                 {
+                   return ListTile(trailing: SizedBox(height: 100,width: 100,child:Row(children: [Text("${snapshots.data.docs[i].data()["salary"]}"),Icon(Icons.monetization_on)]) ,)
+
+                       ,title: Text("${snapshots.data.docs[i].data()["title"]}"),
+                     subtitle: Text("${snapshots.data.docs[i].data()["description"]}"),
+                     onTap:  (){
+                       showDialog(context: context, builder: (
+                           BuildContext context) {
+                         return
+                           AlertDialog(
+                             title: Text("please select"),
+                             actions: [
+                               InkWell(
+                                 child: Row(
+                                   children: [
+                                     Icon(Icons.update),
+                                     Text("applied for job")
+                                   ],
+                                 )
+                                 , onTap: () {
+                                 Navigator.push(context,MaterialPageRoute(builder: (context)=>Application(sectionId, snapshots.data.docs[i].id)));
+                               },
+                               ),
+                               Padding(padding: EdgeInsets.all(10),),
+
+                               //onTap: uplodImages(),
+
+                             ],
+                           );
+                       });},
+                   );
+                 }
+                 ,
+
+               );
+             }
+             return Center(child: CircularProgressIndicator(),);
+           }
+       ),
+
+     );
   }
 
 }
