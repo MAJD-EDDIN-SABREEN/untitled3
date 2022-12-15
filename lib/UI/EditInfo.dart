@@ -37,6 +37,8 @@ class _EditInfoState extends State<EditInfo> {
       SkillsString=query.docs[0]["skills"];
       lat =query.docs[0]["lat"];
       lang =query.docs[0]["lang"];
+
+      phone.text=(query.docs[0]["phone"]).toString();
     });
     setState(() {
       startLocation = LatLng(double.parse(lat!), double.parse(lang!));

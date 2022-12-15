@@ -31,7 +31,6 @@ class _SettingState extends State<Setting> {
 
   getDetail() async {
     await getEmail();
-
     var userPref = FirebaseFirestore.instance.collection("Users");
     var query = await userPref.where("email", isEqualTo: email).get();
     setState(() {
