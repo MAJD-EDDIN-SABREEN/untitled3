@@ -40,6 +40,7 @@ class AddJobState extends State<AddJob> {
   TextEditingController age = new TextEditingController();
   TextEditingController status = new TextEditingController();
   var latlong;
+  GlobalKey<FormState>formStateAddJob=new GlobalKey<FormState>();
   String googleApikey = "AIzaSyA2dUyVmcBLkM8YqLeUorfg0biWVYM-k_U";
   GoogleMapController? mapController;
   CameraPosition? cameraPosition;
@@ -58,26 +59,39 @@ class AddJobState extends State<AddJob> {
     zoom: 14.4746,
   );
 
-  addJob() async {
-    DateTime now = new DateTime.now();
-    DateTime date = new DateTime(now.year, now.month, now.day);
-
-    var userspref = FirebaseFirestore.instance
-        .collection("Section")
-        .doc(sectionId)
-        .collection("Jobs");
-    userspref.add({
-      "title": title.text,
+  addJob(BuildContext context) async {
+    var formData = formStateAddJob.currentState;
+    if (formData!.validate()) {
+      print("dhdhhd");
+      formData.save();
+      DateTime now = new DateTime.now();
+      DateTime date = new DateTime(now.year, now.month, now.day);
+try{
+  var userspref = FirebaseFirestore.instance
+      .collection("Section")
+      .doc(sectionId)
+      .collection("Jobs");
+  userspref.add({
+    "title": title.text,
+    "description": descrptuon.text,
+    "salary": price.text,
+    "requirement": requirements.text,
+    "age": age.text,
+    "status": status.text,
+    "lat": lat,
+    "lang": lang,
+    "created_at": date.toString(),
+    if(file!=null)
       "image": url.toString(),
-      "description": descrptuon.text,
-      "salary": price.text,
-      "requirement": requirements.text,
-      "age": age.text,
-      "status": status.text,
-      "lat":lat,
-      "lang":lang,
-      "created_at": date.toString()
-    });
+
+  });
+  Navigator.pop(context);
+}catch(e){
+  print("dhdhhd");
+}
+
+    }
+
   }
 
   uplodImages() async {
@@ -117,108 +131,114 @@ class AddJobState extends State<AddJob> {
     return Scaffold(
         body: SingleChildScrollView(
       scrollDirection: Axis.vertical,
-      child: Column(
+      child:Form(
+        key: formStateAddJob,
+        child:  Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             (file == null)
                 ? Container(
-                    height: MediaQuery.of(context).size.height / 6,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                    ),
-                    child: IconButton(
-                        onPressed: () {
-                          showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  title: Text("please select"),
-                                  actions: [
-                                    InkWell(
-                                      child: Row(
-                                        children: [
-                                          Icon(Icons.camera_alt),
-                                          Text("From camera")
-                                        ],
-                                      ),
-                                      onTap: () {
-                                        Navigator.pop(context);
-                                        uplodImages();
-                                      },
-                                    ),
-                                    Padding(
-                                      padding: EdgeInsets.all(10),
-                                    ),
-                                    InkWell(
-                                      child: Row(
-                                        children: [
-                                          Icon(Icons.image),
-                                          Text("From gallery")
-                                        ],
-                                      ),
-                                      onTap: () {
-                                        Navigator.pop(context);
-                                        uplodImagesFromGallery();
-                                      },
-                                    )
-                                    //onTap: uplodImages(),
+              height: MediaQuery.of(context).size.height / 6,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+              ),
+              child: IconButton(
+                  onPressed: () {
+                    showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: Text("please select"),
+                            actions: [
+                              InkWell(
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.camera_alt),
+                                    Text("From camera")
                                   ],
-                                );
-                              });
-                        },
-                        icon: Icon(Icons.add)),
-                  )
+                                ),
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  uplodImages();
+                                },
+                              ),
+                              Padding(
+                                padding: EdgeInsets.all(10),
+                              ),
+                              InkWell(
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.image),
+                                    Text("From gallery")
+                                  ],
+                                ),
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  uplodImagesFromGallery();
+                                },
+                              )
+                              //onTap: uplodImages(),
+                            ],
+                          );
+                        });
+                  },
+                  icon: Icon(Icons.add)),
+            )
                 : InkWell(
-                    child: Container(
-                      height: MediaQuery.of(context).size.height / 6,
-                      decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          image: DecorationImage(
-                              fit: BoxFit.fill, image: FileImage(file!))),
-                    ),
-                    onTap: () {
-                      showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              title: Text("please select"),
-                              actions: [
-                                InkWell(
-                                  child: Row(
-                                    children: [
-                                      Icon(Icons.camera_alt),
-                                      Text("From camera")
-                                    ],
-                                  ),
-                                  onTap: () {
-                                    Navigator.pop(context);
-                                    uplodImages();
-                                  },
-                                ),
-                                Padding(
-                                  padding: EdgeInsets.all(10),
-                                ),
-                                InkWell(
-                                  child: Row(
-                                    children: [
-                                      Icon(Icons.image),
-                                      Text("From gallery")
-                                    ],
-                                  ),
-                                  onTap: () {
-                                    Navigator.pop(context);
-                                    uplodImagesFromGallery();
-                                  },
-                                )
-                                //onTap: uplodImages(),
-                              ],
-                            );
-                          });
-                    }),
+                child: Container(
+                  height: MediaQuery.of(context).size.height / 6,
+                  decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      image: DecorationImage(
+                          fit: BoxFit.fill, image: FileImage(file!))),
+                ),
+                onTap: () {
+                  showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: Text("please select"),
+                          actions: [
+                            InkWell(
+                              child: Row(
+                                children: [
+                                  Icon(Icons.camera_alt),
+                                  Text("From camera")
+                                ],
+                              ),
+                              onTap: () {
+                                Navigator.pop(context);
+                                uplodImages();
+                              },
+                            ),
+                            Padding(
+                              padding: EdgeInsets.all(10),
+                            ),
+                            InkWell(
+                              child: Row(
+                                children: [
+                                  Icon(Icons.image),
+                                  Text("From gallery")
+                                ],
+                              ),
+                              onTap: () {
+                                Navigator.pop(context);
+                                uplodImagesFromGallery();
+                              },
+                            )
+                            //onTap: uplodImages(),
+                          ],
+                        );
+                      });
+                }),
             Padding(padding: EdgeInsets.only(top: 10)),
             TextFormField(
               controller: title,
+              validator: (value) {
+                if (value == null || value.isEmpty) return 'Field is required.';
+                return null;
+              },
               textCapitalization: TextCapitalization.words,
               decoration: const InputDecoration(
                   border: UnderlineInputBorder(),
@@ -231,6 +251,10 @@ class AddJobState extends State<AddJob> {
 
             TextFormField(
               controller: descrptuon,
+              validator: (value) {
+                if (value == null || value.isEmpty) return 'Field is required.';
+                return null;
+              },
               textCapitalization: TextCapitalization.words,
               decoration: const InputDecoration(
                   border: UnderlineInputBorder(),
@@ -242,6 +266,10 @@ class AddJobState extends State<AddJob> {
             ),
             TextFormField(
               controller: price,
+              validator: (value) {
+                if (value == null || value.isEmpty) return 'Field is required.';
+                return null;
+              },
               textCapitalization: TextCapitalization.words,
               keyboardType:TextInputType.number ,
               decoration: const InputDecoration(
@@ -254,6 +282,10 @@ class AddJobState extends State<AddJob> {
             ),
             TextFormField(
               controller: requirements,
+              validator: (value) {
+                if (value == null || value.isEmpty) return 'Field is required.';
+                return null;
+              },
               textCapitalization: TextCapitalization.words,
               decoration: const InputDecoration(
                   border: UnderlineInputBorder(),
@@ -265,6 +297,10 @@ class AddJobState extends State<AddJob> {
             ),
             TextFormField(
               controller: age,
+              validator: (value) {
+                if (value == null || value.isEmpty) return 'Field is required.';
+                return null;
+              },
               textCapitalization: TextCapitalization.words,
               keyboardType:TextInputType.number ,
               decoration: const InputDecoration(
@@ -277,6 +313,10 @@ class AddJobState extends State<AddJob> {
             ),
             TextFormField(
               controller: status,
+              validator: (value) {
+                if (value == null || value.isEmpty) return 'Field is required.';
+                return null;
+              },
               keyboardType:TextInputType.number ,
               textCapitalization: TextCapitalization.words,
               decoration: const InputDecoration(
@@ -404,22 +444,28 @@ class AddJobState extends State<AddJob> {
                     isLoading = true;
                   });
 
-                  var refStorage =
-                      FirebaseStorage.instance.ref("images/$nameImage");
-                  await refStorage.putFile(file!);
-                  url = await refStorage.getDownloadURL();
-                  latlong = await mapController?.getLatLng(ScreenCoordinate(x: 200, y: 200));
-                      setState(() {
 
-                      });
-                  addJob();
+                  if(file!=null){
+                    var refStorage =
+                    FirebaseStorage.instance.ref("images/$nameImage");
+                    await refStorage.putFile(file!);
+
+                    url = await refStorage.getDownloadURL();
+                  }
+
+                  latlong = await mapController?.getLatLng(ScreenCoordinate(x: 200, y: 200));
+                  setState(() {
+
+                  });
+                  addJob(context);
                   setState(() {
                     isLoading = false;
                   });
-                  Navigator.pop(context);
+
                 },
                 child: Text("add")),
-          ]),
+          ]),)
+
     ));
   }
 }

@@ -2,7 +2,9 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:untitled3/UI/Sections.dart';
-import 'UI/Log_In.dart';
+import 'package:lottie/lottie.dart';
+
+import 'UI/SplachScreen.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
@@ -20,7 +22,10 @@ Future<void> main() async {
       '/section': (BuildContext context) => Section(""),
 
     },
-    home:(email==null)?Login():Section(role.toString()),
+    home:SplashScreen()
+
+
+        //(email==null)?Login():Section(role.toString()),
   ));
 }
 

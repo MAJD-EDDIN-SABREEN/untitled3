@@ -20,29 +20,30 @@ class AddSectionState extends State<AddSection>{
   var imagepicker = ImagePicker();
   var nameImage;
   var url;
+  GlobalKey<FormState>formStateAddSection=new GlobalKey<FormState>();
   TextEditingController title=new TextEditingController();
-  addData() async {
+  addSection(BuildContext context) async {
+    var formData=formStateAddSection.currentState;
+    if(formData!.validate()) {
+      formData.save();
     DateTime now = new DateTime.now();
     DateTime date = new DateTime(now.year, now.month, now.day);
 
     var userspref = FirebaseFirestore.instance.collection("Section");
     userspref.add({
       "name": title.text,
+      if(file!=null)
       "image":url.toString()
     });
+      Navigator.pop(context);}
   }
   uplodImages() async {
     var imagePicked = await imagepicker.getImage(source: ImageSource.camera);
     if (imagePicked != null) {
       setState(() {
-
         file = File(imagePicked.path);
         nameImage = basename(imagePicked.path);
       });
-
-
-
-      //  url= await refStorage.getDownloadURL();
       print(url);
     }
     else
@@ -173,8 +174,14 @@ class AddSectionState extends State<AddSection>{
              });
            })
             ,    Padding(padding: EdgeInsets.only(top: 10)),
-            TextFormField(
+            Form(
+              key: formStateAddSection,
+            child:TextFormField(
               controller: title,
+              validator: (value) {
+                if (value == null || value.isEmpty) return 'Field is required.';
+                return null;
+              },
               textCapitalization: TextCapitalization.words,
 
 
@@ -186,21 +193,23 @@ class AddSectionState extends State<AddSection>{
 
                   labelStyle: TextStyle(color: Colors.black87,fontWeight: FontWeight.bold)
               ),
-            ) ,
+            )) ,
             Padding(padding: EdgeInsets.only(top: 50)),
             (isLoading==false) ?
             ElevatedButton(onPressed: () async {
       setState((){
         isLoading=true;
       });
+      if(file!=null){
       var refStorage = FirebaseStorage.instance.ref("images/$nameImage");
       await refStorage.putFile(file!);
       url = await refStorage.getDownloadURL();
-      await addData();
+      }
+      await addSection(context);
       setState((){
         isLoading=false;
       });
-     Navigator.pop(context);
+
 
     }, child:Text("add")):
             Center(child:CircularProgressIndicator()),

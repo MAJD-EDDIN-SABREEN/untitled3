@@ -28,11 +28,15 @@ class SectionDetailState extends State<SectionDetail>{
   SectionDetailState(this.id, this.image, this.title);
   bool isLoading = false;
   File ?file;
+  GlobalKey<FormState>formStateUpdateSection=new GlobalKey<FormState>();
   var imagepicker = ImagePicker();
   var nameImage;
   var url;
   TextEditingController title1=new TextEditingController();
-  updateData(var id) async {
+  updateData(var id,BuildContext context) async {
+    var formData=formStateUpdateSection.currentState;
+    if(formData!.validate()) {
+      formData.save();
     var userspref = FirebaseFirestore.instance
         .collection("Section")
         .doc(id);
@@ -40,7 +44,8 @@ class SectionDetailState extends State<SectionDetail>{
       DocumentSnapshot docsnap = await transaction.get(userspref);
       if (docsnap.exists) {
         transaction.update(userspref, {
-          "name": title,
+          "name": title1.text,
+          if(file!=null)
           "image":url.toString()
 
         });
@@ -49,6 +54,8 @@ class SectionDetailState extends State<SectionDetail>{
         print("no");
       }
     });
+      Navigator.pop(context);
+  }
   }
   uplodImages() async {
     var imagePicked = await imagepicker.getImage(source: ImageSource.camera);
@@ -100,59 +107,60 @@ title1.text=title;  }
   Widget build(BuildContext context) {
 return
   Scaffold(
-  body: Column(mainAxisAlignment: MainAxisAlignment.center,
+  body: Form(key:formStateUpdateSection ,
+  child: Column(mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         (file==null)?
-            InkWell(child:  Container(
-              height: MediaQuery.of(context).size.height/6,
-              decoration: BoxDecoration(
-                  shape: BoxShape.circle,
+        InkWell(child:  Container(
+          height: MediaQuery.of(context).size.height/6,
+          decoration: BoxDecoration(
+              shape: BoxShape.circle,
 
-                  image: DecorationImage(
-                      fit: BoxFit.fill,
-                      image:NetworkImage(image)
-                  )
-              ),
+              image: DecorationImage(
+                  fit: BoxFit.fill,
+                  image:NetworkImage(image)
+              )
+          ),
 
 
-            ),
-            onTap:(){  showDialog(context: context, builder: (
-                BuildContext context) {
-              return
-                AlertDialog(
-                  title: Text("please select"),
-                  actions: [
-                    InkWell(
-                      child: Row(
-                        children: [
-                          Icon(Icons.camera_alt),
-                          Text("From camera")
-                        ],
-                      )
-                      , onTap: () {
-                      Navigator.pop(context);
-                      uplodImages();
-                    },
-                    ),
-                    Padding(padding: EdgeInsets.all(10),),
-                    InkWell(
-                      child: Row(
-                        children: [
-                          Icon(Icons.image),
-                          Text("From gallery")
-                        ],
-                      ),
-                      onTap: () {
-                        Navigator.pop(context);
-                        uplodImagesFromGallery();
-                      },
+        ),
+          onTap:(){  showDialog(context: context, builder: (
+              BuildContext context) {
+            return
+              AlertDialog(
+                title: Text("please select"),
+                actions: [
+                  InkWell(
+                    child: Row(
+                      children: [
+                        Icon(Icons.camera_alt),
+                        Text("From camera")
+                      ],
                     )
-                    //onTap: uplodImages(),
+                    , onTap: () {
+                    Navigator.pop(context);
+                    uplodImages();
+                  },
+                  ),
+                  Padding(padding: EdgeInsets.all(10),),
+                  InkWell(
+                    child: Row(
+                      children: [
+                        Icon(Icons.image),
+                        Text("From gallery")
+                      ],
+                    ),
+                    onTap: () {
+                      Navigator.pop(context);
+                      uplodImagesFromGallery();
+                    },
+                  )
+                  //onTap: uplodImages(),
 
-                  ],
-                );
-            });} ,)
+                ],
+              );
+          });} ,)
 
             :
         InkWell(child:Container(
@@ -203,9 +211,13 @@ return
                   );
               });
             })
-,    Padding(padding: EdgeInsets.only(top: 10)),
+        ,    Padding(padding: EdgeInsets.only(top: 10)),
         TextFormField(
           controller: title1,
+          validator: (value) {
+            if (value == null || value.isEmpty) return 'Field is required.';
+            return null;
+          },
           textCapitalization: TextCapitalization.words,
 
 
@@ -218,45 +230,46 @@ return
               labelStyle: TextStyle(color: Colors.black87,fontWeight: FontWeight.bold)
           ),
         ) ,
-    Padding(padding: EdgeInsets.only(top: 50))
-    ,Row(
+        Padding(padding: EdgeInsets.only(top: 50))
+        ,Row(
           mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        (isLoading==false) ?
-        ElevatedButton(onPressed: () async {
-          setState((){
-            isLoading=true;
-          });
-          var refStorage = FirebaseStorage.instance.ref("images/$nameImage");
-          if(file!=null)
-          {
-            await refStorage.putFile(file!);
-            url = await refStorage.getDownloadURL();
-          }
-          else{
-            url=image;
-          }
-          await updateData(id);
-          setState((){
-            isLoading=false;
-          });
-          Navigator.pop(context);}, child:Text("Update")):
-        Center(child:CircularProgressIndicator()),
-        Padding(padding: EdgeInsets.only(left: 5)),
-        (isLoading==false) ?  ElevatedButton(onPressed: () async {
-          setState((){
-            isLoading=true;
-          });
-          await deleteData(id);
-          setState((){
-            isLoading=false;
-          });
-          Navigator.pop(context);}, child:Text("Delete")):
-        Center(child:CircularProgressIndicator())
-      ],
-    )
+          children: [
+            (isLoading==false) ?
+            ElevatedButton(onPressed: () async {
+              setState((){
+                isLoading=true;
+              });
+              var refStorage = FirebaseStorage.instance.ref("images/$nameImage");
+              if(file!=null)
+              {
+                await refStorage.putFile(file!);
+                url = await refStorage.getDownloadURL();
+              }
+              else{
+                url=image;
+              }
+              await updateData(id,context);
+              setState((){
+                isLoading=false;
+              });
+              }, child:Text("Update")):
+            Center(child:CircularProgressIndicator()),
+            Padding(padding: EdgeInsets.only(left: 5)),
+            (isLoading==false) ?  ElevatedButton(onPressed: () async {
+              setState((){
+                isLoading=true;
+              });
+              await deleteData(id);
+              setState((){
+                isLoading=false;
+              });
+              Navigator.pop(context);}, child:Text("Delete")):
+            Center(child:CircularProgressIndicator())
+          ],
+        )
 
-  ]),
+      ]),)
+
 
 
 );

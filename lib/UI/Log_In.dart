@@ -15,6 +15,7 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   bool isLoading = false;
   String role = "";
+  GlobalKey<FormState>formStateLogin=new GlobalKey<FormState>();
   TextEditingController password = new TextEditingController();
   TextEditingController email = new TextEditingController();
 
@@ -29,6 +30,9 @@ class _LoginState extends State<Login> {
   }
 
   login() async {
+    var formData=formStateLogin.currentState;
+    if(formData!.validate()) {
+      formData.save();
     try {
       UserCredential userCredential = await FirebaseAuth.instance
           .signInWithEmailAndPassword(
@@ -72,73 +76,90 @@ class _LoginState extends State<Login> {
         );
         // print('Wrong password provided for that user.');
       }
-    }
+    }}
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         body: Container(
-      decoration: BoxDecoration(
-        image: DecorationImage(
-            image: AssetImage("images/signUp.jpg"), fit: BoxFit.fill),
-      ),
-      child: Form(
-        child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            scrollDirection: Axis.vertical,
-            child: Container(
-              height: MediaQuery.of(context).size.height,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Card(
-                    child: Column(children: [
-                      Container(
-                        alignment: Alignment.center,
-                        padding: EdgeInsets.only(left: 20),
-                        child: TextFormField(
-                          controller: email,
-                          textCapitalization: TextCapitalization.words,
-                          decoration: const InputDecoration(
-                              border: UnderlineInputBorder(),
-                              filled: true,
-                              icon: Icon(Icons.mail),
-                              labelText: 'Email',
-                              labelStyle: TextStyle(
-                                  color: Colors.black87,
-                                  fontWeight: FontWeight.bold)),
-                        ),
+          padding: EdgeInsets.only(left: 10,right: 10,top: 30),
+          decoration: BoxDecoration(
+            // image: DecorationImage(
+            //     image: AssetImage("images/signUp.jpg"), fit: BoxFit.fill),
+          ),
+          child:Card(elevation: 5,child:    Form(
+            key: formStateLogin,
+            child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                scrollDirection: Axis.vertical,
+                child: Container(
+                  height: MediaQuery.of(context).size.height,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Card(
+                        child: Column(children: [
+                          Container(
+                            alignment: Alignment.center,
+                            padding: EdgeInsets.only(left: 20),
+                            child: TextFormField(
+                              controller: email,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) return 'Field is required.';
+                                return null;
+                              },
+                              textCapitalization: TextCapitalization.words,
+                              decoration: const InputDecoration(
+                                  border: UnderlineInputBorder(),
+                                  filled: true,
+                                  icon: Icon(Icons.mail),
+                                  labelText: 'Email',
+                                  labelStyle: TextStyle(
+                                      color: Colors.black87,
+                                      fontWeight: FontWeight.bold)),
+                            ),
 
-                        //color: Colors.blueGrey
-                      ),
-                      Container(
-                        alignment: Alignment.center,
-                        padding: EdgeInsets.only(left: 20),
-                        child: TextFormField(
-                          controller: password,
-                          textCapitalization: TextCapitalization.words,
-                          obscureText: true,
-                          decoration: const InputDecoration(
-                              border: UnderlineInputBorder(),
-                              filled: true,
-                              icon: Icon(Icons.password),
-                              labelText: 'Password',
-                              labelStyle: TextStyle(
-                                  color: Colors.black87,
-                                  fontWeight: FontWeight.bold)),
-                        ),
+                            //color: Colors.blueGrey
+                          ),
+                          Container(
+                            alignment: Alignment.center,
+                            padding: EdgeInsets.only(left: 20),
+                            child: TextFormField(
+                              controller: password,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) return 'Field is required.';
+                                return null;
+                              },
+                              textCapitalization: TextCapitalization.words,
+                              obscureText: true,
+                              decoration: const InputDecoration(
+                                  border: UnderlineInputBorder(),
+                                  filled: true,
+                                  icon: Icon(Icons.password),
+                                  labelText: 'Password',
+                                  labelStyle: TextStyle(
+                                      color: Colors.black87,
+                                      fontWeight: FontWeight.bold)),
+                            ),
 
-                        //color: Colors.blueGrey
+                            //color: Colors.blueGrey
+                          ),
+                        ]),
                       ),
-                    ]),
-                  ),
-                  Padding(
-                      padding: EdgeInsets.only(
-                          top: MediaQuery.of(context).size.height / 10)),
-                  (isLoading == false)
-                      ? ElevatedButton(
+                      Padding(
+                          padding: EdgeInsets.only(
+                              top: MediaQuery.of(context).size.height / 10)),
+                      (isLoading == false)
+                          ?
+                      ElevatedButton(
+style: ElevatedButton.styleFrom(
+  backgroundColor:Colors.black ,
+    padding: EdgeInsets.symmetric(horizontal: 40, vertical: 10),
+    textStyle: TextStyle(
+        fontSize: 10,
+        fontWeight: FontWeight.bold)),
                           onPressed: () async {
                             setState(() {
                               isLoading = true;
@@ -151,27 +172,30 @@ class _LoginState extends State<Login> {
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) => Section(role)),
-                                (Route<dynamic> route) => false);
+                                    (Route<dynamic> route) => false);
                           },
+
                           child: Text(
                             "Login",
                             style: TextStyle(fontSize: 30),
                           ))
-                      : Center(child: CircularProgressIndicator()),
-                  Padding(padding: EdgeInsets.only(top: 10)),
-                  InkWell(
-                    child: Text("Don't have an account"),
-                    onTap: () {
-                      Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(builder: (context) => SignUp()),
-                          (Route<dynamic> route) => false);
-                    },
-                  )
-                ],
-              ),
-            )),
-      ),
-    ));
+                          : Center(child: CircularProgressIndicator()),
+                      Padding(padding: EdgeInsets.only(top: 10)),
+                      InkWell(
+                        child: Text("Don't have an account"),
+                        onTap: () {
+                          Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(builder: (context) => SignUp()),
+                                  (Route<dynamic> route) => false);
+                        },
+                      )
+                    ],
+                  ),
+                )),
+          ),)
+       ,
+        ) ,
+        );
   }
 }

@@ -54,6 +54,7 @@ class JobDetailState extends State<JobDetail> {
       this.requirements, this.age, this.status,this.sectionId,this.lat,this.lang);
 
   Set<Marker>?myMarker;
+  GlobalKey<FormState>formStateUpdateJob=new GlobalKey<FormState>();
 
   GoogleMapController? mapController;
 
@@ -70,7 +71,11 @@ class JobDetailState extends State<JobDetail> {
   String ?status1 ;
   LatLng ?startLocation;
 
-  updateData(var id) async {
+  updateData(var id,BuildContext context) async {
+    var formData = formStateUpdateJob.currentState;
+    if (formData!.validate()) {
+
+      formData.save();
     var userspref = FirebaseFirestore.instance
         .collection("Section")
         .doc(sectionId)
@@ -81,20 +86,23 @@ class JobDetailState extends State<JobDetail> {
       if (docsnap.exists) {
         transaction.update(userspref, {
           "title": title1.text,
-          "image": url.toString(),
           "description": description1.text,
           "requirement":requirements1.text,
           "age":age1.text,
           "status":status1,
           "lat":lat,
-          "lang":lang
+          "lang":lang,
+          if(file!=null)
+          "image": url.toString(),
+
         });
       }
       else {
         print("no");
       }
     });
-  }
+      Navigator.pop(context);
+  }}
 
   uplodImages() async {
     var imagePicked = await imagepicker.getImage(source: ImageSource.camera);
@@ -159,78 +167,28 @@ class JobDetailState extends State<JobDetail> {
   Widget build(BuildContext context) {
     return Scaffold(
       body:SingleChildScrollView(scrollDirection: Axis.vertical,
-      child: Column(mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            (file == null) ?
-            InkWell(child: Container(
-              height: MediaQuery
-                  .of(context)
-                  .size
-                  .height / 6,
-              decoration: BoxDecoration(
-                  shape: BoxShape.circle,
+      child:Form(
+        key:formStateUpdateJob ,
+        child: Column(mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              (file == null) ?
+              InkWell(child: Container(
+                height: MediaQuery
+                    .of(context)
+                    .size
+                    .height / 6,
+                decoration: BoxDecoration(
+                    shape: BoxShape.circle,
 
-                  image: DecorationImage(
-                      fit: BoxFit.fill,
-                      image: NetworkImage(image)
-                  )
+                    image: DecorationImage(
+                        fit: BoxFit.fill,
+                        image: NetworkImage(image)
+                    )
+                ),
+
+
               ),
-
-
-            ),
-              onTap: () {
-                showDialog(context: context, builder: (BuildContext context) {
-                  return
-                    AlertDialog(
-                      title: Text("please select"),
-                      actions: [
-                        InkWell(
-                          child: Row(
-                            children: [
-                              Icon(Icons.camera_alt),
-                              Text("From camera")
-                            ],
-                          )
-                          , onTap: () {
-                          Navigator.pop(context);
-                          uplodImages();
-                        },
-                        ),
-                        Padding(padding: EdgeInsets.all(10),),
-                        InkWell(
-                          child: Row(
-                            children: [
-                              Icon(Icons.image),
-                              Text("From gallery")
-                            ],
-                          ),
-                          onTap: () {
-                            Navigator.pop(context);
-                            uplodImagesFromGallery();
-                          },
-                        )
-                        //onTap: uplodImages(),
-
-                      ],
-                    );
-                });
-              },)
-
-                :
-            InkWell(child: Container(
-              height: MediaQuery
-                  .of(context)
-                  .size
-                  .height / 6,
-              decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  image: DecorationImage(
-                      fit: BoxFit.fill,
-                      image: FileImage(file!)
-                  )
-
-              ),),
                 onTap: () {
                   showDialog(context: context, builder: (BuildContext context) {
                     return
@@ -267,180 +225,256 @@ class JobDetailState extends State<JobDetail> {
                         ],
                       );
                   });
-                })
-            , Padding(padding: EdgeInsets.only(top: 10)),
-            TextFormField(
-              controller: title1,
-              textCapitalization: TextCapitalization.words,
-              decoration: const InputDecoration(
-                  border: UnderlineInputBorder(),
-                  filled: true,
-                  icon: Icon(Icons.password),
-                  labelText: 'Title',
+                },)
 
-                  labelStyle: TextStyle(
-                      color: Colors.black87, fontWeight: FontWeight.bold)
-              ),
-            ),
-            TextFormField(
-              controller: description1,
-              textCapitalization: TextCapitalization.words,
-              decoration: const InputDecoration(
-                  border: UnderlineInputBorder(),
-                  filled: true,
-                  icon: Icon(Icons.pages_outlined),
-                  labelText: 'Description',
+                  :
+              InkWell(child: Container(
+                height: MediaQuery
+                    .of(context)
+                    .size
+                    .height / 6,
+                decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    image: DecorationImage(
+                        fit: BoxFit.fill,
+                        image: FileImage(file!)
+                    )
 
-                  labelStyle: TextStyle(
-                      color: Colors.black87, fontWeight: FontWeight.bold)
-              ),
-            ),
-            TextFormField(
-              controller: salary1,
-              textCapitalization: TextCapitalization.words,
-              decoration: const InputDecoration(
-                  border: UnderlineInputBorder(),
-                  filled: true,
-                  icon: Icon(Icons.monetization_on),
-                  labelText: 'Salary',
+                ),),
+                  onTap: () {
+                    showDialog(context: context, builder: (BuildContext context) {
+                      return
+                        AlertDialog(
+                          title: Text("please select"),
+                          actions: [
+                            InkWell(
+                              child: Row(
+                                children: [
+                                  Icon(Icons.camera_alt),
+                                  Text("From camera")
+                                ],
+                              )
+                              , onTap: () {
+                              Navigator.pop(context);
+                              uplodImages();
+                            },
+                            ),
+                            Padding(padding: EdgeInsets.all(10),),
+                            InkWell(
+                              child: Row(
+                                children: [
+                                  Icon(Icons.image),
+                                  Text("From gallery")
+                                ],
+                              ),
+                              onTap: () {
+                                Navigator.pop(context);
+                                uplodImagesFromGallery();
+                              },
+                            )
+                            //onTap: uplodImages(),
 
-                  labelStyle: TextStyle(
-                      color: Colors.black87, fontWeight: FontWeight.bold)
-              ),
-            ),
-            TextFormField(
-              controller: requirements1,
-              textCapitalization: TextCapitalization.words,
-              decoration: const InputDecoration(
-                  border: UnderlineInputBorder(),
-                  filled: true,
-                  icon: Icon(Icons.padding_rounded),
-                  labelText: 'requirement',
-                  labelStyle: TextStyle(
-                      color: Colors.black87, fontWeight: FontWeight.bold)),
-            ),
-            TextFormField(
-              controller: age1,
-              textCapitalization: TextCapitalization.words,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                  border: UnderlineInputBorder(),
-                  filled: true,
-                  icon: Icon(Icons.view_agenda_outlined),
-                  labelText: 'age',
-                  labelStyle: TextStyle(
-                      color: Colors.black87, fontWeight: FontWeight.bold)),
-            ),
-Padding(padding:EdgeInsets.only(top: 20)),
-Row(mainAxisAlignment: MainAxisAlignment.center,
-
-  children: [Icon(Icons.signal_wifi_statusbar_null_sharp)
-    ,Text("Status",style: TextStyle(fontWeight: FontWeight.bold),)],),
-            DropDownTextField(
-              padding: EdgeInsets.only(left: 50),
-              dropdownRadius: 20,
-              listSpace: 20,
-              listPadding: ListPadding(top: 20),
-              initialValue: status,
-              //enableSearch: true,
-
-              validator: (value) {
-                if (value == null) {
-                  return "Required field";
-                } else {
+                          ],
+                        );
+                    });
+                  })
+              , Padding(padding: EdgeInsets.only(top: 10)),
+              TextFormField(
+                controller: title1,
+                validator: (value) {
+                  if (value == null || value.isEmpty) return 'Field is required.';
                   return null;
-                }
-              },
-              dropDownList: const [
-                DropDownValueModel(name: 'available', value: "T"),
-                DropDownValueModel(name: ' not available', value: "F"),
-              ],
-              listTextStyle: const TextStyle(color: Colors.blue),
-              dropDownItemCount: 8,
+                },
+                textCapitalization: TextCapitalization.words,
+                decoration: const InputDecoration(
+                    border: UnderlineInputBorder(),
+                    filled: true,
+                    icon: Icon(Icons.padding_rounded),
+                    labelText: 'Title',
 
-              onChanged: (val) {
-                status1=val.toString();
-              },
-            ),
-            Container(height: MediaQuery.of(context).size.height/4,child: GoogleMap(
-              //Map widget from google_maps_flutter package
-              zoomGesturesEnabled: true, //enable Zoom in, out on map
-              initialCameraPosition: CameraPosition(
-                //innital position in map
-                target: startLocation!, //initial position
-                zoom: 14.0, //initial zoom level
+                    labelStyle: TextStyle(
+                        color: Colors.black87, fontWeight: FontWeight.bold)
+                ),
+              ),
+              TextFormField(
+                controller: description1,
+                validator: (value) {
+                  if (value == null || value.isEmpty) return 'Field is required.';
+                  return null;
+                },
+                textCapitalization: TextCapitalization.words,
+                decoration: const InputDecoration(
+                    border: UnderlineInputBorder(),
+                    filled: true,
+                    icon: Icon(Icons.pages_outlined),
+                    labelText: 'Description',
+
+                    labelStyle: TextStyle(
+                        color: Colors.black87, fontWeight: FontWeight.bold)
+                ),
+              ),
+              TextFormField(
+                controller: salary1,
+                validator: (value) {
+                  if (value == null || value.isEmpty) return 'Field is required.';
+                  return null;
+                },
+                textCapitalization: TextCapitalization.words,
+                decoration: const InputDecoration(
+                    border: UnderlineInputBorder(),
+                    filled: true,
+                    icon: Icon(Icons.monetization_on),
+                    labelText: 'Salary',
+
+                    labelStyle: TextStyle(
+                        color: Colors.black87, fontWeight: FontWeight.bold)
+                ),
+              ),
+              TextFormField(
+                controller: requirements1,
+                validator: (value) {
+                  if (value == null || value.isEmpty) return 'Field is required.';
+                  return null;
+                },
+                textCapitalization: TextCapitalization.words,
+                decoration: const InputDecoration(
+                    border: UnderlineInputBorder(),
+                    filled: true,
+
+                    icon: Icon(Icons.padding_rounded),
+                    labelText: 'requirement',
+                    labelStyle: TextStyle(
+                        color: Colors.black87, fontWeight: FontWeight.bold)),
+              ),
+              TextFormField(
+                controller: age1,
+                validator: (value) {
+                  if (value == null || value.isEmpty) return 'Field is required.';
+                  return null;
+                },
+                textCapitalization: TextCapitalization.words,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                    border: UnderlineInputBorder(),
+                    filled: true,
+                    icon: Icon(Icons.view_agenda_outlined),
+                    labelText: 'age',
+                    labelStyle: TextStyle(
+                        color: Colors.black87, fontWeight: FontWeight.bold)),
+              ),
+              Padding(padding:EdgeInsets.only(top: 20)),
+              Row(mainAxisAlignment: MainAxisAlignment.center,
+
+                children: [Icon(Icons.signal_wifi_statusbar_null_sharp)
+                  ,Text("Status",style: TextStyle(fontWeight: FontWeight.bold),)],),
+              DropDownTextField(
+                padding: EdgeInsets.only(left: 50),
+                dropdownRadius: 20,
+                listSpace: 20,
+                listPadding: ListPadding(top: 20),
+                initialValue: status,
+                //enableSearch: true,
+
+                validator: (value) {
+                  if (value == null) {
+                    return "Required field";
+                  } else {
+                    return null;
+                  }
+                },
+                dropDownList: const [
+                  DropDownValueModel(name: 'available', value: "T"),
+                  DropDownValueModel(name: ' not available', value: "F"),
+                ],
+                listTextStyle: const TextStyle(color: Colors.blue),
+                dropDownItemCount: 8,
+
+                onChanged: (val) {
+                  status1=val.toString();
+                },
+              ),
+              Container(height: MediaQuery.of(context).size.height/4,child: GoogleMap(
+                //Map widget from google_maps_flutter package
+                zoomGesturesEnabled: true, //enable Zoom in, out on map
+                initialCameraPosition: CameraPosition(
+                  //innital position in map
+                  target: startLocation!, //initial position
+                  zoom: 14.0, //initial zoom level
+                )
+                ,
+                markers: myMarker!,
+                mapType: MapType.normal,
+                onTap: (latlang){
+                  setState(() {
+                    myMarker!.remove(Marker(markerId: MarkerId("1")));
+                    myMarker!.add( Marker(markerId: MarkerId("1"),position:latlang ));
+                    lat=latlang.latitude.toString();
+                    lang=latlang.longitude.toString();
+                  });
+                  print(latlang.latitude);
+
+                },//map type
+                onMapCreated: (controller) {
+                  //method called when map is created
+                  setState(() {
+                    mapController = controller;
+                  });
+                },
+              ) ,),
+
+
+
+
+
+
+
+
+              Padding(padding: EdgeInsets.only(top: 30))
+              , Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  (isLoading == false) ?
+                  ElevatedButton(onPressed: () async {
+                    setState(() {
+                      isLoading = true;
+                    });
+                    var refStorage = FirebaseStorage.instance.ref(
+                        "images/$nameImage");
+                    if (file != null) {
+                      await refStorage.putFile(file!);
+                      url = await refStorage.getDownloadURL();
+                    }
+                    else {
+                      url = image;
+                    }
+                    ;
+                   // url = await refStorage.getDownloadURL();
+                    await updateData(id,context);
+                    setState(() {
+                      isLoading = false;
+                    });
+
+                  }, child: Text("Update")) :
+                  Center(child: CircularProgressIndicator()),
+                  Padding(padding: EdgeInsets.only(left: 5)),
+                  (isLoading == false) ? ElevatedButton(onPressed: () async {
+                    setState(() {
+                      isLoading = true;
+                    });
+                    await deleteData(id);
+                    setState(() {
+                      isLoading = false;
+                    });
+                    Navigator.pop(context);
+                  }, child: Text("Delete")) :
+                  Center(child: CircularProgressIndicator())
+                ],
               )
-              ,
-              markers: myMarker!,
-              mapType: MapType.normal,
-              onTap: (latlang){
-                setState(() {
-                  myMarker!.remove(Marker(markerId: MarkerId("1")));
-                  myMarker!.add( Marker(markerId: MarkerId("1"),position:latlang ));
-                  lat=latlang.latitude.toString();
-                  lang=latlang.longitude.toString();
-                });
-                print(latlang.latitude);
 
-              },//map type
-              onMapCreated: (controller) {
-                //method called when map is created
-                setState(() {
-                  mapController = controller;
-                });
-              },
-            ) ,),
+            ]) ,
+      )
 
-
-
-
-
-
-
-
-            Padding(padding: EdgeInsets.only(top: 30))
-            , Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                (isLoading == false) ?
-                ElevatedButton(onPressed: () async {
-                  setState(() {
-                    isLoading = true;
-                  });
-                  var refStorage = FirebaseStorage.instance.ref(
-                      "images/$nameImage");
-                  if (file != null) {
-                    await refStorage.putFile(file!);
-                    url = await refStorage.getDownloadURL();
-                  }
-                  else {
-                    url = image;
-                  }
-                  ;
-                  url = await refStorage.getDownloadURL();
-                  await updateData(id);
-                  setState(() {
-                    isLoading = false;
-                  });
-                  Navigator.pop(context);
-                }, child: Text("Update")) :
-                Center(child: CircularProgressIndicator()),
-                Padding(padding: EdgeInsets.only(left: 5)),
-                (isLoading == false) ? ElevatedButton(onPressed: () async {
-                  setState(() {
-                    isLoading = true;
-                  });
-                  await deleteData(id);
-                  setState(() {
-                    isLoading = false;
-                  });
-                  Navigator.pop(context);
-                }, child: Text("Delete")) :
-                Center(child: CircularProgressIndicator())
-              ],
-            )
-
-          ]),)
+      )
 
 
 

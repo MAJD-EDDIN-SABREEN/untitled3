@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:searchfield/searchfield.dart';
 import 'package:untitled3/UI/addJob.dart';
 import 'package:untitled3/UI/application.dart';
@@ -26,7 +27,23 @@ class JobsState extends State<Jobs>{
   String searchText = '';
   bool search = false;
   String ?title;
+  GoogleMapController? mapController;
   JobsState(this.sectionId,this.role);
+  String ?appnum;
+  Future<String?> getUserData(String id) async {
+
+    var userPref = FirebaseFirestore.instance.collection("Application");
+    var query = await userPref.where("jobid", isEqualTo: id).get();
+ appnum= await query.docs.length.toString();
+setState(() {
+//print(appnum);
+});
+
+return appnum;
+  }
+  getAppnum(){
+
+  }
   @override
   void initState() {
     documents=[];
@@ -39,7 +56,7 @@ class JobsState extends State<Jobs>{
      (role=="manger")?
      Scaffold(
      appBar: AppBar(
-       backgroundColor: Colors.blue,
+       backgroundColor: Colors.black,
        actions: [
          Container(
          height: MediaQuery.of(context).size.height,
@@ -97,11 +114,68 @@ documents=[];
                        {
                          documents.add(snapshots.data.docs[i].data());
                          print("${snapshots.data.docs[i].data()}");
-                         return ListTile(
-                           trailing: SizedBox(height: 100,width: 100,child:Row(children: [Text("${snapshots.data.docs[i].data()["salary"]}"),Icon(Icons.monetization_on)]) ,)
+                         return Card(
+                             elevation: 3,
 
-                           , title: Text("${snapshots.data.docs[i].data()["title"]}"),
-                           subtitle: Text("${snapshots.data.docs[i].data()["description"]}"),
+                             child:
+                             Container(decoration: BoxDecoration(
+                             borderRadius: BorderRadius.circular(100),
+                         ),
+                         child:
+                         InkWell(child: Column(
+                           children: [
+
+                             SizedBox(height: MediaQuery.of(context).size.height/10
+                                 ,
+                                 width: MediaQuery.of(context).size.width
+                                 ,child:
+                                 Row(
+                                   //mainAxisAlignment: MainAxisAlignment.spaceAround,
+
+                                   children: [
+                                     Text("${snapshots.data.docs[i].data()["title"]}",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),),
+                                     Padding(padding: EdgeInsets.only(left: MediaQuery.of(context).size.width/3)),
+
+                                     Text("${snapshots.data.docs[i].data()["salary"]}",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),)
+                                     ,Text("SAR",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),),
+                                   ],
+                                 )),
+                             Center(
+                               child:  Text("${snapshots.data.docs[i].data()["description"]}",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),),
+
+                             ),
+
+                             Container(padding:EdgeInsets.only(top: 10),
+                               height: MediaQuery.of(context).size.height/4,child: GoogleMap(
+                                 //Map widget from google_maps_flutter package
+                                 zoomGesturesEnabled: true, //enable Zoom in, out on map
+                                 initialCameraPosition: CameraPosition(
+                                   //innital position in map
+                                   target: LatLng(double.parse("${snapshots.data.docs[i].data()["lat"]}"), double.parse("${snapshots.data.docs[i].data()["lang"]}")), //initial position
+                                   zoom: 14.0,
+                                   //initial zoom level
+                                 )
+                                 ,
+                                 markers:<Marker>{
+                                   Marker(markerId: MarkerId("1"),position: LatLng(double.parse("${snapshots.data.docs[i].data()["lat"]}"), double.parse("${snapshots.data.docs[i].data()["lang"]}")), //initial position
+                                   ),
+
+                                 }
+
+                                 ,
+                                 mapType: MapType.normal,
+                                 onMapCreated: (controller) {
+                                   //method called when map is created
+                                   setState(() {
+                                     mapController = controller;
+                                   });
+                                 },
+
+                               ) ,),
+
+
+
+                           ],),
                            onTap:  (){
                              showDialog(context: context, builder: (
                                  BuildContext context) {
@@ -138,7 +212,7 @@ documents=[];
                                    ],
                                  );
                              });},
-                         );
+                         )));
                        }
                        ,
 
@@ -164,50 +238,121 @@ documents=[];
                itemCount: snapshots.data.docs!.length,
                itemBuilder: (context,i)
                {
+
                  documents.add(snapshots.data.docs[i].data());
 
-                 return ListTile(
-                   trailing: SizedBox(height: 100,width: 100,child:Row(children: [Text("${snapshots.data.docs[i].data()["salary"]}"),Icon(Icons.monetization_on)]) ,)
+                 return Card(
+                   elevation: 20,
+                   //color: Colors.,
 
-                   , title: Text("${snapshots.data.docs[i].data()["title"]}"),
-                   subtitle: Text("${snapshots.data.docs[i].data()["description"]}"),
-                   onTap:  (){
-                     showDialog(context: context, builder: (
-                         BuildContext context) {
-                       return
-                         AlertDialog(
-                           title: Text("please select"),
-                           actions: [
-                             InkWell(
-                               child: Row(
-                                 children: [
-                                   Icon(Icons.update),
-                                   Text("Update job")
-                                 ],
-                               )
-                               , onTap: () {
-                               Navigator.push(context,MaterialPageRoute(builder: (context)=>JobDetail(snapshots.data.docs[i].id, "${snapshots.data.docs[i].data()["image"]}", "${snapshots.data.docs[i].data()["title"]}", "${snapshots.data.docs[i].data()["description"]}", "${snapshots.data.docs[i].data()["salary"]}","${snapshots.data.docs[i].data()["requirement"]}","${snapshots.data.docs[i].data()["age"]}","${snapshots.data.docs[i].data()["status"]}",sectionId,"${snapshots.data.docs[i].data()["lat"]}","${snapshots.data.docs[i].data()["lang"]}")));
-                             },
-                             ),
-                             Padding(padding: EdgeInsets.all(10),),
-                             InkWell(
-                               child: Row(
-                                 children: [
-                                   Icon(Icons.padding_rounded),
-                                   Text("show applications")
-                                 ],
-                               )
-                               , onTap: () {
-                               Navigator.push(context,MaterialPageRoute(builder: (context)=>ShowApplicaton(sectionId, snapshots.data.docs[i].id)));
-                             },
-                             ),
+                   child:
+                   Container(padding: EdgeInsets.all(10),
+                       decoration: BoxDecoration(
+                     borderRadius: BorderRadius.circular(100),
+                   ),
+                   child:
+                   InkWell(child: Column(
+                     children: [
 
-                             //onTap: uplodImages(),
+                     SizedBox(height: MediaQuery.of(context).size.height/10
+                         ,
+                         width: MediaQuery.of(context).size.width
+                         ,child:
+                         Row(
+                          //mainAxisAlignment: MainAxisAlignment.spaceAround,
 
-                           ],
-                         );
-                     });},
-                 );
+                       children: [
+                         Text("${snapshots.data.docs[i].data()["title"]}",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),),
+Padding(padding: EdgeInsets.only(left: MediaQuery.of(context).size.width/3)),
+
+                         Text("${snapshots.data.docs[i].data()["salary"]}",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),)
+                         ,Text("SAR",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),),
+                       ],
+                     )),
+                     Center(
+                      child:  Text("${snapshots.data.docs[i].data()["description"]}",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),),
+
+                     ),
+
+                       Center(
+                         child:  Text((getUserData((snapshots.data.docs[i].id))).toString()
+
+                           ,style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),),
+
+                       ),
+
+                       Container(padding:EdgeInsets.only(top: 10),
+                         height: MediaQuery.of(context).size.height/4,child: GoogleMap(
+                         //Map widget from google_maps_flutter package
+                         zoomGesturesEnabled: true, //enable Zoom in, out on map
+                         initialCameraPosition: CameraPosition(
+                           //innital position in map
+                           target: LatLng(double.parse("${snapshots.data.docs[i].data()["lat"]}"), double.parse("${snapshots.data.docs[i].data()["lang"]}")), //initial position
+                           zoom: 14.0,
+                           //initial zoom level
+                         )
+                         ,
+                         markers:<Marker>{
+                       Marker(markerId: MarkerId("1"),position: LatLng(double.parse("${snapshots.data.docs[i].data()["lat"]}"), double.parse("${snapshots.data.docs[i].data()["lang"]}")), //initial position
+                       ),
+
+                       }
+
+                         ,
+                         mapType: MapType.normal,
+                           onMapCreated: (controller) {
+                             //method called when map is created
+                             setState(() {
+                               mapController = controller;
+                             });
+                           },
+
+                       ) ,),
+
+
+
+                   ],),
+                     onTap:  (){
+                       showDialog(context: context, builder: (
+                           BuildContext context) {
+                         return
+                           AlertDialog(
+                             title: Text("please select"),
+                             actions: [
+                               InkWell(
+                                 child: Row(
+                                   children: [
+                                     Icon(Icons.update),
+                                     Text("Update job")
+                                   ],
+                                 )
+                                 , onTap: () {
+                                 Navigator.push(context,MaterialPageRoute(builder: (context)=>JobDetail(snapshots.data.docs[i].id, "${snapshots.data.docs[i].data()["image"]}", "${snapshots.data.docs[i].data()["title"]}", "${snapshots.data.docs[i].data()["description"]}", "${snapshots.data.docs[i].data()["salary"]}","${snapshots.data.docs[i].data()["requirement"]}","${snapshots.data.docs[i].data()["age"]}","${snapshots.data.docs[i].data()["status"]}",sectionId,"${snapshots.data.docs[i].data()["lat"]}","${snapshots.data.docs[i].data()["lang"]}")));
+                               },
+                               ),
+                               Padding(padding: EdgeInsets.all(10),),
+                               InkWell(
+                                 child: Row(
+                                   children: [
+                                     Icon(Icons.padding_rounded),
+                                     Text("show applications")
+                                   ],
+                                 )
+                                 , onTap: () {
+                                 Navigator.push(context,MaterialPageRoute(builder: (context)=>ShowApplicaton(sectionId, snapshots.data.docs[i].id)));
+                               },
+                               ),
+
+                               //onTap: uplodImages(),
+
+                             ],
+                           );
+                       });},
+                   )
+
+                   ),)
+                  ;
+
                }
                ,
 
@@ -279,11 +424,68 @@ documents=[];
                    {
                      documents.add(snapshots.data.docs[i].data());
                      print("${snapshots.data.docs[i].data()}");
-                     return ListTile(
-                       trailing: SizedBox(height: 100,width: 100,child:Row(children: [Text("${snapshots.data.docs[i].data()["salary"]}"),Icon(Icons.monetization_on)]) ,)
+                     return Card(
+                         elevation: 3,
 
-                       , title: Text("${snapshots.data.docs[i].data()["title"]}"),
-                       subtitle: Text("${snapshots.data.docs[i].data()["description"]}"),
+                         child:
+                         Container(decoration: BoxDecoration(
+                           borderRadius: BorderRadius.circular(100),
+                         ),
+                             child:
+                             InkWell(child: Column(
+                               children: [
+
+                                 SizedBox(height: MediaQuery.of(context).size.height/10
+                                     ,
+                                     width: MediaQuery.of(context).size.width
+                                     ,child:
+                                     Row(
+                                       //mainAxisAlignment: MainAxisAlignment.spaceAround,
+
+                                       children: [
+                                         Text("${snapshots.data.docs[i].data()["title"]}",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),),
+                                         Padding(padding: EdgeInsets.only(left: MediaQuery.of(context).size.width/3)),
+
+                                         Text("${snapshots.data.docs[i].data()["salary"]}",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),)
+                                         ,Text("SAR",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),),
+                                       ],
+                                     )),
+                                 Center(
+                                   child:  Text("${snapshots.data.docs[i].data()["description"]}",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),),
+
+                                 ),
+
+                                 Container(padding:EdgeInsets.only(top: 10),
+                                   height: MediaQuery.of(context).size.height/4,child: GoogleMap(
+                                     //Map widget from google_maps_flutter package
+                                     zoomGesturesEnabled: true, //enable Zoom in, out on map
+                                     initialCameraPosition: CameraPosition(
+                                       //innital position in map
+                                       target: LatLng(double.parse("${snapshots.data.docs[i].data()["lat"]}"), double.parse("${snapshots.data.docs[i].data()["lang"]}")), //initial position
+                                       zoom: 14.0,
+                                       //initial zoom level
+                                     )
+                                     ,
+                                     markers:<Marker>{
+                                       Marker(markerId: MarkerId("1"),position: LatLng(double.parse("${snapshots.data.docs[i].data()["lat"]}"), double.parse("${snapshots.data.docs[i].data()["lang"]}")), //initial position
+                                       ),
+
+                                     }
+
+                                     ,
+                                     mapType: MapType.normal,
+                                     onMapCreated: (controller) {
+                                       //method called when map is created
+                                       setState(() {
+                                         mapController = controller;
+                                       });
+                                     },
+
+                                   ) ,),
+
+
+
+                               ],),
                        onTap:  (){
                          showDialog(context: context, builder: (
                              BuildContext context) {
@@ -320,7 +522,7 @@ documents=[];
                                ],
                              );
                          });},
-                     );
+                     )));
                    }
                    ,
 
@@ -344,10 +546,68 @@ documents=[];
                  itemBuilder: (context,i)
                  {
                    documents.add(snapshots.data.docs[i].data());
-                   return ListTile(trailing: SizedBox(height: 100,width: 100,child:Row(children: [Text("${snapshots.data.docs[i].data()["salary"]}"),Icon(Icons.monetization_on)]) ,)
+                   return Card(
+                       elevation: 3,
 
-                       ,title: Text("${snapshots.data.docs[i].data()["title"]}"),
-                     subtitle: Text("${snapshots.data.docs[i].data()["description"]}"),
+                       child:
+                       Container(decoration: BoxDecoration(
+                         borderRadius: BorderRadius.circular(100),
+                       ),
+                           child:
+                           InkWell(child: Column(
+                             children: [
+
+                               SizedBox(height: MediaQuery.of(context).size.height/10
+                                   ,
+                                   width: MediaQuery.of(context).size.width
+                                   ,child:
+                                   Row(
+                                     //mainAxisAlignment: MainAxisAlignment.spaceAround,
+
+                                     children: [
+                                       Text("${snapshots.data.docs[i].data()["title"]}",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),),
+                                       Padding(padding: EdgeInsets.only(left: MediaQuery.of(context).size.width/3)),
+
+                                       Text("${snapshots.data.docs[i].data()["salary"]}",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),)
+                                       ,Text("SAR",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),),
+                                     ],
+                                   )),
+                               Center(
+                                 child:  Text("${snapshots.data.docs[i].data()["description"]}",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),),
+
+                               ),
+
+                               Container(padding:EdgeInsets.only(top: 10),
+                                 height: MediaQuery.of(context).size.height/4,child: GoogleMap(
+                                   //Map widget from google_maps_flutter package
+                                   zoomGesturesEnabled: true, //enable Zoom in, out on map
+                                   initialCameraPosition: CameraPosition(
+                                     //innital position in map
+                                     target: LatLng(double.parse("${snapshots.data.docs[i].data()["lat"]}"), double.parse("${snapshots.data.docs[i].data()["lang"]}")), //initial position
+                                     zoom: 14.0,
+                                     //initial zoom level
+                                   )
+                                   ,
+                                   markers:<Marker>{
+                                     Marker(markerId: MarkerId("1"),position: LatLng(double.parse("${snapshots.data.docs[i].data()["lat"]}"), double.parse("${snapshots.data.docs[i].data()["lang"]}")), //initial position
+                                     ),
+
+                                   }
+
+                                   ,
+                                   mapType: MapType.normal,
+                                   onMapCreated: (controller) {
+                                     //method called when map is created
+                                     setState(() {
+                                       mapController = controller;
+                                     });
+                                   },
+
+                                 ) ,),
+
+
+
+                             ],),
                      onTap:  (){
                        showDialog(context: context, builder: (
                            BuildContext context) {
@@ -373,7 +633,7 @@ documents=[];
                              ],
                            );
                        });},
-                   );
+                   )));
                  }
                  ,
 

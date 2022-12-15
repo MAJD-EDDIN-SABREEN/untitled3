@@ -21,6 +21,10 @@ class _SettingState extends State<Setting> {
       await prefs.setBool("theme", true);
     else
       await prefs.setBool("theme", false);
+    setState(() {
+
+    });
+
   }
   getEmail() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -167,7 +171,6 @@ class _SettingState extends State<Setting> {
                     child: ElevatedButton(
                         onPressed: () {
                           changeTheme();
-                          setState(() {});
                         },
                         child: Text("Theme")),
                   ),
