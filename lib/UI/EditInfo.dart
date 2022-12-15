@@ -46,9 +46,6 @@ class _EditInfoState extends State<EditInfo> {
         Marker(markerId: MarkerId("1"),position:LatLng(double.parse(lat!), double.parse(lang!)) )
       };
     });
-    setState(() {
-
-    });
   }
 
   getUserid() async {
@@ -101,18 +98,16 @@ class _EditInfoState extends State<EditInfo> {
 
   @override
   void initState() {
-    startLocation = LatLng(31.243133358657364, 31.243133358657364);
-    myMarker ={
-      Marker(markerId: MarkerId("1"),position:LatLng(31.243133358657364, 31.243133358657364) )
-    };
-
     getUserData();
-
-
   }
 
   @override
   Widget build(BuildContext context) {
+
+    startLocation = LatLng(double.parse(lat!), double.parse(lang!));
+    myMarker ={
+      Marker(markerId: MarkerId("1"),position:LatLng(double.parse(lat!), double.parse(lang!)) )
+    };
     return Scaffold(
       appBar: AppBar(),
       body: SingleChildScrollView(

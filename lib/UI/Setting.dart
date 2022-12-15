@@ -25,12 +25,14 @@ class _SettingState extends State<Setting> {
   getEmail() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     email = await prefs.getString('email');
-    print(email);
+
     setState(() {});
+    print(email);
   }
 
   getDetail() async {
     await getEmail();
+    print("hi");
     var userPref = FirebaseFirestore.instance.collection("Users");
     var query = await userPref.where("email", isEqualTo: email).get();
     setState(() {

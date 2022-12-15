@@ -26,7 +26,6 @@ class Section extends StatefulWidget {
 
 class SectionState extends State<Section> {
   String role;
-
   SectionState(this.role);
   int _selectedIndex = 0;
   void _onItemTapped(int index) {
@@ -200,7 +199,6 @@ signOut() async {
               IconButton(onPressed: () async {signOut();
               SharedPreferences prefs = await SharedPreferences.getInstance();
               prefs.remove('email');
-
               prefs.remove('id');
             prefs.remove('theme');
             }, icon:Icon(Icons.logout_sharp)),
