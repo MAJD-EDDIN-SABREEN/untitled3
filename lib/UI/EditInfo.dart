@@ -109,7 +109,7 @@ class _EditInfoState extends State<EditInfo> {
       Marker(markerId: MarkerId("1"),position:LatLng(double.parse(lat!), double.parse(lang!)) )
     };
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(backgroundColor: Colors.black),
       body: SingleChildScrollView(
         scrollDirection: Axis.vertical,
         child: Column(

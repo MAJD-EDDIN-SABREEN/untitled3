@@ -41,6 +41,23 @@ setState(() {
 
 return appnum;
   }
+  addApllicatonNumber(var id) async {
+    var appnum1=await getUserData(id);
+    var userspref = FirebaseFirestore.instance.collection("Section").doc(sectionId).collection("Jobs").doc(id);
+    FirebaseFirestore.instance.runTransaction((transaction) async {
+      DocumentSnapshot docsnap = await transaction.get(userspref);
+      if (docsnap.exists) {
+        transaction.set(
+            userspref,
+            {
+              "appnum": appnum1,
+            },
+            SetOptions(merge: true));
+      } else {
+        print("no");
+      }
+    });
+  }
   getAppnum(){
 
   }
@@ -113,7 +130,7 @@ documents=[];
                        itemBuilder: (context,i)
                        {
                          documents.add(snapshots.data.docs[i].data());
-                         print("${snapshots.data.docs[i].data()}");
+                         addApllicatonNumber(snapshots.data.docs[i].id);
                          return Card(
                              elevation: 3,
 
@@ -142,6 +159,12 @@ documents=[];
                                  )),
                              Center(
                                child:  Text("${snapshots.data.docs[i].data()["description"]}",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),),
+
+                             ),
+                             Center(
+                               child:  Text("applied number  :   "+"${snapshots.data.docs[i].data()["appnum"]}"
+
+                                 ,style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),),
 
                              ),
 
@@ -240,7 +263,7 @@ documents=[];
                {
 
                  documents.add(snapshots.data.docs[i].data());
-
+                addApllicatonNumber(snapshots.data.docs[i].id);
                  return Card(
                    elevation: 20,
                    //color: Colors.,
@@ -275,7 +298,7 @@ Padding(padding: EdgeInsets.only(left: MediaQuery.of(context).size.width/3)),
                      ),
 
                        Center(
-                         child:  Text((getUserData((snapshots.data.docs[i].id))).toString()
+                         child:  Text("applied number  :   "+"${snapshots.data.docs[i].data()["appnum"]}"
 
                            ,style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),),
 
@@ -362,7 +385,9 @@ Padding(padding: EdgeInsets.only(left: MediaQuery.of(context).size.width/3)),
          }
      ),
 
-     floatingActionButton: FloatingActionButton(onPressed: (){
+     floatingActionButton: FloatingActionButton(
+         backgroundColor: Colors.black,
+         onPressed: (){
        Navigator.push(context,MaterialPageRoute(builder: (context)=>AddJob(sectionId)));
      },child: Icon(Icons.add)),
    ):
@@ -423,7 +448,7 @@ Padding(padding: EdgeInsets.only(left: MediaQuery.of(context).size.width/3)),
                    itemBuilder: (context,i)
                    {
                      documents.add(snapshots.data.docs[i].data());
-                     print("${snapshots.data.docs[i].data()}");
+                     addApllicatonNumber(snapshots.data.docs[i].id);
                      return Card(
                          elevation: 3,
 
@@ -452,6 +477,12 @@ Padding(padding: EdgeInsets.only(left: MediaQuery.of(context).size.width/3)),
                                      )),
                                  Center(
                                    child:  Text("${snapshots.data.docs[i].data()["description"]}",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),),
+
+                                 ),
+                                 Center(
+                                   child:  Text("applied number  :   "+"${snapshots.data.docs[i].data()["appnum"]}"
+
+                                     ,style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),),
 
                                  ),
 
@@ -546,6 +577,7 @@ Padding(padding: EdgeInsets.only(left: MediaQuery.of(context).size.width/3)),
                  itemBuilder: (context,i)
                  {
                    documents.add(snapshots.data.docs[i].data());
+                   addApllicatonNumber(snapshots.data.docs[i].id);
                    return Card(
                        elevation: 3,
 
@@ -574,6 +606,12 @@ Padding(padding: EdgeInsets.only(left: MediaQuery.of(context).size.width/3)),
                                    )),
                                Center(
                                  child:  Text("${snapshots.data.docs[i].data()["description"]}",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),),
+
+                               ),
+                               Center(
+                                 child:  Text("applied number  :   "+"${snapshots.data.docs[i].data()["appnum"]}"
+
+                                   ,style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),),
 
                                ),
 

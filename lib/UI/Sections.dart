@@ -65,7 +65,7 @@ signOut() async {
     return
       (role=="manger")?
       Scaffold(
-        appBar: AppBar(backgroundColor: Colors.blue,
+        appBar: AppBar(backgroundColor: Colors.black,
         actions: [
           IconButton(onPressed: () async {signOut();
           SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -185,7 +185,9 @@ signOut() async {
               return Center(child: CircularProgressIndicator());
             }
         ) ,),
-      floatingActionButton: FloatingActionButton(onPressed: (){
+      floatingActionButton: FloatingActionButton(
+          backgroundColor: Colors.black,
+          onPressed: (){
       Navigator.push(context,MaterialPageRoute(builder: (context)=>AddSection()));
     },child: Icon(Icons.add)),
 
@@ -193,7 +195,7 @@ signOut() async {
 
       ):
       Scaffold(
-        appBar: AppBar(backgroundColor: Colors.blue,
+        appBar: AppBar(backgroundColor: Colors.black,
 
             actions: [
               IconButton(onPressed: () async {signOut();
